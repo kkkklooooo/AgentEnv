@@ -1,8 +1,12 @@
 # AgentEnv (`aenv`)
 
+<p align="left">
+  <b>English</b> | <a href="README_zh.md">简体中文</a>
+</p>
+
 **Stop juggling config files. Switch AI presets in seconds.**  
-> **面向终端 AI 编码助手（Claude Code、Codex CLI、Gemini 等）的通用预设隔离与环境管理器。**  
-> 一秒切换「工作 / 个人 / 开源」配置，多工具统一管理，终端零残留、零污染。
+> **A lightweight, zero-hook environment and preset isolation manager for terminal AI coding agents (Claude Code, Codex CLI, Gemini CLI, OpenCode, and more).**  
+> Switch between Work, Personal, and Client setups in seconds—unified multi-agent management, zero config collisions, zero terminal pollution.
 
 [![Go Version](https://img.shields.io/badge/Go-1.22+-00ADD8?style=flat&logo=go)](https://go.dev/)
 [![Platform](https://img.shields.io/badge/Platform-Windows%20%7C%20Linux%20%7C%20macOS-4D4D4D)](https://github.com/)
@@ -10,156 +14,156 @@
 
 ---
 
-## 为什么需要 aenv？
+## Why aenv?
 
 ```bash
-# 以前：手动拷文件夹、改 settings.json，生怕把全局 Token 和历史搞丢
-cp -r ~/.claude ~/.claude.work.bak   # 😰 切换麻烦，多窗口并发时极易互相踩踏
+# Before: Manually backing up folders, editing settings.json, fearing lost tokens or history
+cp -r ~/.claude ~/.claude.work.bak   # 😰 Tedious, and multi-window runs easily corrupt each other
 
-# 现在：一条命令进入隔离预设，用完 exit 瞬间复原
-aenv shell work                      # ✅ 零侵入、零污染、全自动穿透
+# After: One command to enter an isolated preset; type exit to restore instantly
+aenv shell work                      # ✅ Non-invasive, zero pollution, auto-penetrating
 ```
 
-### 痛点对比
+### Pain Points Comparison
 
-| 痛点 | `aenv` 的解决方式 |
+| Pain Point | How `aenv` Solves It |
 | :--- | :--- |
-| **多工具配置各管各的** | 统一管理 **Claude Code**, **Codex**, **Gemini**, **OpenCode** 等多个 Agent，一个预设即可联动所有工具。 |
-| **覆盖全局配置容易踩踏** | **绝不硬写全局基底目录**。通过瞬时子 Shell 和软链视口隔离，多终端窗口同时跑不同预设互不干扰。 |
-| **每次都要重复配置一套** | **有则覆盖，无则穿透**。预设里只放你想修改的文件（如 MCP 或规约），历史记录和登录态 100% 自动穿透共用。 |
-| **Shell 钩子容易搞坏终端** | **零终端钩子 (Zero-Hook)**。不修改 `.bashrc` 或 PowerShell `$PROFILE`，退出即还原，对宿主环境零残留。 |
+| **Fragmented multi-agent configs** | Unifies **Claude Code**, **Codex**, **Gemini**, and **OpenCode** under a single preset—switch once, isolate all. |
+| **Global config collisions** | **Never overwrites your host home directory**. Uses ephemeral shadow viewports and subshells so multiple windows can run different presets safely. |
+| **Reconfiguring everything from scratch** | **Overrides what exists, penetrates what doesn't**. Keep only diff files (like MCP configs or custom rules); auth tokens and session history penetrate seamlessly. |
+| **Shell hooks mess up terminals** | **Zero-hook design**. No tampering with `.bashrc`, `.zshrc`, or PowerShell `$PROFILE`. Type `exit` to cleanly restore. |
 
 ---
 
-## 快速上手 (1 分钟)
+## Quick Start (1 Minute)
 
-### 1. 安装 (Go 1.22+)
+### 1. Installation (Go 1.22+)
 
 ```bash
-# 直接安装
+# Install directly
 go install ./cmd/aenv
 
-# 或克隆源码本地编译
+# Or build from source
 git clone https://github.com/your-username/AgentEnv.git
 cd AgentEnv && go build -o bin/aenv ./cmd/aenv
 ```
 
-> **Windows 用户提示**：Windows 原生软链接需要启用系统**开发者模式 (Developer Mode)**。以管理员身份在 PowerShell 执行一次即可：
+> **Windows Notice**: Windows native symlinks require **Developer Mode** enabled. Run once in Administrator PowerShell:
 > ```powershell
 > reg add "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\AppModelUnlock" /t REG_DWORD /f /v "AllowDevelopmentWithoutDevLicense" /d "1"
 > ```
-> 可随时运行 `aenv doctor` 检查环境就绪状态。
+> You can run `aenv doctor` at any time to verify system readiness.
 
-### 2. 三步日常工作流
+### 2. Three-Step Daily Workflow
 
 ```bash
-# 1. 创建一个预设（例如名为 work）
+# 1. Create a preset (e.g., named "work")
 aenv preset create work
 
-# 2. 放入你要覆盖的配置文件
-# 例如想单独给 Claude 换配置，把你的 settings.json 丢进：
+# 2. Drop your override files into the corresponding folder
+# E.g., to override settings for Claude Code, place your settings.json into:
 # ~/.agentenv/presets/work/claude/settings.json
 
-# 3. 激活预设进入终端
+# 3. Launch the preset environment
 aenv shell work
-# 终端提示符变成: [(aenv:work)]>
-claude   # 此时 Claude 自动读取工作配置！
+# Terminal prompt changes to: [(aenv:work)]>
+claude   # Claude now runs with your work configuration!
 
-# 4. 用完打 exit 原样退出
+# 4. Exit anytime
 exit
 ```
 
 ---
 
-## 常用命令手册 (Usage)
+## Command-Line Usage (CLI)
 
-### 核心命令
+### Core Commands
 
-| 命令 | 说明与示例 |
+| Command | Description & Example |
 | :--- | :--- |
-| `aenv shell <preset>[/<agent>]` | **启动预设子终端**（别名 `activate`）。退出输入 `exit`。<br>• `aenv shell work`（多个 Agent 时自动唤起方向键多选菜单）<br>• `aenv shell work/claude`（直接指定单一 Agent） |
-| `aenv run <preset>[/<agent>] -- <cmd>` | **单次执行命令**，不常驻子终端，100% 透明透传子进程退出码。<br>• `aenv run work/claude -- claude --model sonnet`<br>• `aenv run work/claude --dry-run -- claude`（仅预览环境变量与执行指令） |
-| `aenv env <preset>[/<agent>]` | **只读输出环境变量**导出语句（供外部脚本调用，自动适配当前 Shell）。<br>• `aenv env work/claude` |
+| `aenv shell <preset>[/<agent>]` | **Spawn an isolated subshell** (alias: `activate`). Type `exit` to leave.<br>• `aenv shell work` (interactive arrow-key menu if multiple agents exist)<br>• `aenv shell work/claude` (target a single agent directly) |
+| `aenv run <preset>[/<agent>] -- <cmd>` | **Execute a one-off command** in the preset environment without keeping a subshell. 100% transparent exit code pass-through.<br>• `aenv run work/claude -- claude --model sonnet`<br>• `aenv run work/claude --dry-run -- claude` (preview env vars without executing) |
+| `aenv env <preset>[/<agent>]` | **Print environment variable exports** (read-only, formatted for your current shell).<br>• `aenv env work/claude` |
 
-### 预设管理 (`aenv preset`)
+### Preset Management (`aenv preset`)
 
-| 命令 | 说明 |
+| Command | Description |
 | :--- | :--- |
-| `aenv preset create <name>` | 创建新预设骨架（自动生成 `shared/` 以及各已注册 Agent 的专属文件夹） |
-| `aenv preset list` | 查看所有预设及每个预设下正在生效的覆写文件列表 |
-| `aenv preset diff <preset>` | 彩色比对预设内的文件与原生基底文件的差异（改动一目了然） |
+| `aenv preset create <name>` | Scaffold a new preset directory (creates `shared/` and registered agent folders) |
+| `aenv preset list` | List all presets, target agents, and active override files |
+| `aenv preset diff <preset>` | Show colorized diff between preset overrides and baseline host configs |
 
-### 系统维护
+### System Maintenance
 
-| 命令 | 说明 |
+| Command | Description |
 | :--- | :--- |
-| `aenv doctor` | 一键自检系统权限、开发者模式、父 Shell，并**自动同步新增 Agent 到各已有预设** |
-| `aenv status` | 查看当前子终端所处的预设名称与生效环境变量（在子 Shell 内使用） |
-| `aenv clean` | 清除生成的运行时影子缓存（纯软链，随时可安全清理） |
-| `aenv version` | 输出当前 aenv 版本 |
+| `aenv doctor` | Run system diagnostics (permissions, Developer Mode, shell detection, and **auto-sync new agents to existing presets**) |
+| `aenv status` | Show active preset and environment variables (use inside an active subshell) |
+| `aenv clean` | Purge ephemeral runtime cache in `runtimes/` (safe to run anytime) |
+| `aenv version` | Print current aenv version |
 
-*支持全局选项 `--no-color` 关闭终端彩色高亮。*
+*Global flag `--no-color` is supported to disable ANSI colors.*
 
 ---
 
-## 怎么组织预设文件？
+## How Presets Work
 
-所有预设集中在 `~/.agentenv/presets/`（Windows 为 `%USERPROFILE%\.agentenv\presets\`）：
+Presets are stored in `~/.agentenv/presets/` (Windows: `%USERPROFILE%\.agentenv\presets\`):
 
 ```text
 ~/.agentenv/presets/work/
-├── shared/                   # 预设内所有 Agent 共享的文件（如通用的 .mcp.json, AGENTS.md）
-├── claude/                   # Claude 专属覆写（如 settings.json, CLAUDE.md）
-└── codex/                    # Codex 专属覆写（如 config.toml）
+├── shared/                   # Files shared across all agents in this preset (e.g. .mcp.json, AGENTS.md)
+├── claude/                   # Claude-specific overrides (e.g. settings.json, CLAUDE.md)
+└── codex/                    # Codex-specific overrides (e.g. config.toml)
 ```
 
-**简单规则，无需学习中间配置语法**：
-1. **有则覆写**：你在 `claude/` 放了 `settings.json`，在预设环境里就会替换掉默认配置；
-2. **无则穿透**：没放的文件（例如 `history.jsonl`、登录 token 等）全自动穿透使用宿主基底，无需重新登录；
-3. **完全同构**：官方工具在 `~/.claude/` 怎么放，你在 `presets/work/claude/` 就怎么放。
+**Three Simple Principles**:
+1. **Override what exists**: Put `settings.json` in `claude/`, and it replaces the default config in the preset runtime.
+2. **Penetrate what doesn't**: Anything omitted (e.g. `history.jsonl`, auth sessions) penetrates directly from your host baseline—no re-logging in.
+3. **100% Isomorphic**: The directory structure mirrors native agent home folders (`~/.claude/`). No intermediate DSLs to learn.
 
 ---
 
-## 扩展支持其他 Agent (`config.toml`)
+## Registering Custom Agents (`config.toml`)
 
-默认内置支持 `claude`, `codex`, `gemini`, `opencode`。  
-如果你想支持任何其他终端 AI 工具，在 `~/.agentenv/config.toml` 添加几行即可：
+`claude`, `codex`, `gemini`, and `opencode` are built-in by default.  
+To support any other CLI agent, simply add a few lines to `~/.agentenv/config.toml`:
 
 ```toml
 [agents.myagent]
-env_var = "MYAGENT_CONFIG_DIR"        # 该工具读取配置目录的环境变量名
-host_dir = "~/.myagent"               # 该工具默认的宿主配置目录
+env_var = "MYAGENT_CONFIG_DIR"        # Env variable the tool reads for its config dir
+host_dir = "~/.myagent"               # Host baseline directory
 ```
 
-添加后运行一次 `aenv doctor`，它会自动为所有预设同步建好 `myagent/` 文件夹！
+Then run `aenv doctor`, and it will automatically scaffold `myagent/` across all your existing presets!
 
 ---
 
-## 退出码规范 (Exit Codes)
+## Exit Codes
 
-| 退出码 | 说明 |
+| Exit Code | Description |
 | :---: | :--- |
-| `0` | 正常执行完毕 |
-| `1` | 业务错误（如指定的预设或 Agent 不存在） |
-| `2` | 命令行参数或语法错误 |
-| `3` | 系统环境错误（如 Windows 未开启开发者模式） |
-| `N` | `aenv run` 时直接透明返回目标子进程自身的退出码 |
+| `0` | Success |
+| `1` | Business error (preset or agent not found) |
+| `2` | Usage or CLI argument syntax error |
+| `3` | System error (Windows Developer Mode / symlink privilege not held) |
+| `N` | `aenv run` transparently forwards the target process's exit code |
 
 ---
 
-## 致敬与灵感来源 (Acknowledgments)
+## Acknowledgments & Inspiration
 
-本项目的设计灵感来源于优秀的开源项目 [claudectx](https://github.com/foxj77/claudectx)。
+This project was inspired by the excellent open-source tool [claudectx](https://github.com/foxj77/claudectx).
 
-`claudectx` 最早探索了 Claude Code 多配置切换的便利体验。在此基础上，`aenv` 进一步演进并重构了运行模型：
-- **从单工具到多 Agent**：不止服务 Claude，更以通用基础设施形态原生支持 Claude Code、Codex CLI、Gemini CLI 等任意终端 AI 助手；
-- **从全局硬写到零钩子子终端**：不直接修改全局 `~/.claude` 或篡改 CLI 参数，而是通过**瞬时影子视口与进程级子 Shell**，实现真正的零残留、零踩踏与多端并发安全；
-- **从整包复制到差量穿透**：引入智能分层继承与软链农场，只需维护几行差异文件，告别全盘文件冗余。
+`claudectx` pioneered the concept of quick profile switching for Claude Code. `aenv` builds upon this idea and evolves the paradigm:
+- **From Single-Tool to Multi-Agent**: Seamless native support not just for Claude, but across Claude Code, Codex CLI, Gemini CLI, and any terminal AI agent.
+- **From Global Overwriting to Zero-Hook Subshells**: Instead of writing to global `~/.claude` or hacking CLI flags, `aenv` uses **ephemeral shadow viewports and process-level subshells** for zero pollution, zero collisions, and safe multi-terminal concurrency.
+- **From Full-Copy to Diff-Penetration**: Smart cascading inheritance and symlink farms ensure you only maintain the diffs you care about, eliminating configuration bloat.
 
-感谢 `claudectx` 为社区带来的启发！
+Kudos to `claudectx` for inspiring the community!
 
 ---
 
-## 许可证 (License)
+## License
 
 [MIT License](LICENSE)
