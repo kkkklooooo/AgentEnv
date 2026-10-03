@@ -1,7 +1,10 @@
 package shell
 
 import (
+	"errors"
 	"fmt"
+	"os"
+	"os/exec"
 )
 
 // ShellType represents the identified shell family
@@ -39,4 +42,47 @@ func (c *SubshellConfig) FormatEnvSlice() []string {
 		res = append(res, fmt.Sprintf("%s=%s", k, v))
 	}
 	return res
+}
+
+// DetectShellWithOverride detects the shell, respecting an optional override from config
+func DetectShellWithOverride(override string) (*DetectedShell, error) {
+	if override != "" {
+		path, err := exec.LookPath(override)
+		if err != nil {
+			path = override
+		}
+		return &DetectedShell{
+			Type:       ShellType(fmt.Sprintf("Custom (%s)", override)),
+			BinaryPath: path,
+			ParentPID:  os.Getppid(),
+			ParentName: override,
+		}, nil
+	}
+
+	return DetectActiveShell()
+}
+
+// ExecCommand executes a command directly with injected environment variables, transparently forwarding stdio and exit code
+func ExecCommand(cmdName string, cmdArgs []string, envVars map[string]string) (int, error) {
+	cmd := exec.Command(cmdName, cmdArgs...)
+	cmd.Stdin = os.Stdin
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+
+	env := os.Environ()
+	for k, v := range envVars {
+		env = append(env, fmt.Sprintf("%s=%s", k, v))
+	}
+	cmd.Env = env
+
+	err := cmd.Run()
+	if err != nil {
+		var exitErr *exec.ExitError
+		if errors.As(err, &exitErr) {
+			return exitErr.ExitCode(), nil
+		}
+		return 1, err
+	}
+
+	return 0, nil
 }
