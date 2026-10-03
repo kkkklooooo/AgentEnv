@@ -1,8 +1,8 @@
 # AI Coding Agent 预设隔离运行时 (AgentEnv / aenv)
 # 完整工程技术规范文档 (spec.md)
 
-- **版本**: v1.0.0-draft
-- **状态**: Approved (基于 Grill-Me 裁决确认)
+- **版本**: v1.0.0 (Official Release)
+- **状态**: Approved (正式发行规约)
 - **事实源**: [intend.md](file:///D:/Projects/Go/AgentEnv/intend.md)
 - **语言实现**: Go 1.22+
 
@@ -269,7 +269,7 @@ aenv
   personal-frontend         claude    CLAUDE.md
   ```
 
-#### 4. `aenv preset create <name>` (MVP 版规约)
+#### 4. `aenv preset create <name>`
 - 遵循“文件系统为唯一来源”哲学，不提供繁冗的细粒度添加命令，仅创建预设基础框架：
   - 自动创建 `~/.agentenv/presets/<name>/`；
   - 自动创建预设内部共享目录 `~/.agentenv/presets/<name>/shared/`；
@@ -285,7 +285,9 @@ aenv
   2. **Symlink Capability**: 检测系统是否允许创建文件软链。若为 Windows 且未开启开发者模式，输出警告及一键开启 PowerShell 命令。
   3. **Shell Detection**: 探测当前父终端 Shell 进程及类型。
   4. **Agents Validation**: 遍历 `config.toml` 中注册的 Agent，检测对应 `host_dir` 是否存在。
-  5. **Presets Integrity**: 校验 `presets/` 下的各预设目录命名是否合法、软链是否健康。
+  5. **Presets Storage**: 校验 `presets/` 下的各预设目录命名是否合法、软链是否健康。
+  6. **Preset Framework Sync**: 自动扫描 `config.toml` 中新注册的 Agent；若发现已有预设中缺失对应目录，自动同步补齐预设框架目录（如 `presets/<preset>/<new_agent>/` 和 `shared/`）。
+  7. **Runtimes Cache**: 校验运行时视口缓存状态及活跃视口数量。
 
 ---
 

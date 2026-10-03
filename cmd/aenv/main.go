@@ -18,7 +18,7 @@ import (
 )
 
 const (
-	Version = "v0.1.0-mvp"
+	Version = "v1.0.0"
 
 	ExitSuccess  = 0
 	ExitBusiness = 1
@@ -102,6 +102,9 @@ func newShellCmd() *cobra.Command {
 			if _, err := os.Stat(presetDir); os.IsNotExist(err) {
 				return fmt.Errorf("preset %q does not exist in %s", presetName, presetDir)
 			}
+
+			// Ensure all registered agent folders are synchronized
+			_, _ = engine.SyncPresetAgentFolders(cfg)
 
 			var agentsToActivate []string
 			if specificAgent != "" {
@@ -197,6 +200,9 @@ func newRunCmd() *cobra.Command {
 			if _, err := os.Stat(presetDir); os.IsNotExist(err) {
 				return fmt.Errorf("preset %q does not exist in %s", presetName, presetDir)
 			}
+
+			// Ensure all registered agent folders are synchronized
+			_, _ = engine.SyncPresetAgentFolders(cfg)
 
 			var agentsToActivate []string
 			if specificAgent != "" {
@@ -558,7 +564,30 @@ func newDoctorCmd() *cobra.Command {
 			pEntries, _ := os.ReadDir(pDir)
 			table.AddRow("Presets Storage", ui.Green("OK"), fmt.Sprintf("%d presets in %s", len(pEntries), pDir))
 
+			// 6. Preset Framework Synchronization (Check & auto-scaffold missing agent folders)
+			syncReport, syncErr := engine.SyncPresetAgentFolders(cfg)
+			if syncErr != nil {
+				table.AddRow("Preset Framework", ui.Red("FAIL"), syncErr.Error())
+			} else if syncReport.TotalCreated > 0 {
+				table.AddRow("Preset Framework", ui.Green("SYNCED"), fmt.Sprintf("Auto-scaffolded %d missing agent folders across %d presets", syncReport.TotalCreated, len(syncReport.Results)))
+			} else {
+				table.AddRow("Preset Framework", ui.Green("OK"), "All presets synchronized with agent registry")
+			}
+
+			// 7. Runtimes Cache
+			rDir, _ := config.RuntimesDir()
+			rEntries, _ := os.ReadDir(rDir)
+			table.AddRow("Runtimes Cache", ui.Green("OK"), fmt.Sprintf("%d active viewports in %s", len(rEntries), rDir))
+
 			table.Render(os.Stdout)
+
+			if syncReport != nil && syncReport.TotalCreated > 0 {
+				fmt.Println()
+				fmt.Println(ui.Green("✓"), ui.Bold("Framework Sync: Auto-scaffolded missing folders for newly registered agents:"))
+				for _, res := range syncReport.Results {
+					fmt.Printf("   * %s: created [%s]\n", ui.Bold(ui.Cyan(res.PresetName)), strings.Join(res.CreatedDirs, ", "))
+				}
+			}
 
 			if symlinkErr != nil && runtime.GOOS == "windows" {
 				fmt.Println()
