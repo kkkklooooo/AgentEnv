@@ -5,7 +5,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"agentenv/internal/config"
+	"github.com/kkkklooooo/AgentEnv/internal/config"
 )
 
 // PresetSyncResult tracks folders created for a specific preset

@@ -10,11 +10,11 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"agentenv/internal/config"
-	"agentenv/internal/engine"
-	"agentenv/internal/platform"
-	"agentenv/internal/shell"
-	"agentenv/internal/ui"
+	"github.com/kkkklooooo/AgentEnv/internal/config"
+	"github.com/kkkklooooo/AgentEnv/internal/engine"
+	"github.com/kkkklooooo/AgentEnv/internal/platform"
+	"github.com/kkkklooooo/AgentEnv/internal/shell"
+	"github.com/kkkklooooo/AgentEnv/internal/ui"
 )
 
 const (

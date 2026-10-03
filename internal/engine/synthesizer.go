@@ -6,8 +6,8 @@ import (
 	"path/filepath"
 	"time"
 
-	"agentenv/internal/config"
-	"agentenv/internal/platform"
+	"github.com/kkkklooooo/AgentEnv/internal/config"
+	"github.com/kkkklooooo/AgentEnv/internal/platform"
 )
 
 // Synthesizer coordinates 4-tier cascading viewport synthesis

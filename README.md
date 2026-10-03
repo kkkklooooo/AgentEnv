@@ -41,10 +41,10 @@ aenv shell work                      # ✅ Non-invasive, zero pollution, auto-pe
 
 ```bash
 # Install directly
-go install ./cmd/aenv
+go install github.com/kkkklooooo/AgentEnv/cmd/aenv@latest
 
 # Or build from source
-git clone https://github.com/your-username/AgentEnv.git
+git clone https://github.com/kkkklooooo/AgentEnv.git
 cd AgentEnv && go build -o bin/aenv ./cmd/aenv
 ```
 

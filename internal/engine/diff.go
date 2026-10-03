@@ -6,7 +6,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"agentenv/internal/config"
+	"github.com/kkkklooooo/AgentEnv/internal/config"
 )
 
 // DiffResult contains unified diff output and whether differences were found

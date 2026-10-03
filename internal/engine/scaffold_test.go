@@ -5,7 +5,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	"agentenv/internal/config"
+	"github.com/kkkklooooo/AgentEnv/internal/config"
 )
 
 func TestSyncPresetAgentFolders(t *testing.T) {

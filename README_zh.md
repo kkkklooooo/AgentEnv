@@ -41,10 +41,10 @@ aenv shell work                      # ✅ 零侵入、零污染、全自动穿�
 
 ```bash
 # 直接安装
-go install ./cmd/aenv
+go install github.com/kkkklooooo/AgentEnv/cmd/aenv@latest
 
 # 或克隆源码本地编译
-git clone https://github.com/your-username/AgentEnv.git
+git clone https://github.com/kkkklooooo/AgentEnv.git
 cd AgentEnv && go build -o bin/aenv ./cmd/aenv
 ```
 

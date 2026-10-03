@@ -6,8 +6,8 @@ import (
 	"os"
 	"path/filepath"
 
-	"agentenv/internal/config"
-	"agentenv/internal/platform"
+	"github.com/kkkklooooo/AgentEnv/internal/config"
+	"github.com/kkkklooooo/AgentEnv/internal/platform"
 )
 
 // CleanRuntimes removes all synthesized viewports under ~/.agentenv/runtimes/

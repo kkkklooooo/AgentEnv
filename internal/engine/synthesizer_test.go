@@ -5,8 +5,8 @@ import (
 	"path/filepath"
 	"testing"
 
-	"agentenv/internal/config"
-	"agentenv/internal/platform"
+	"github.com/kkkklooooo/AgentEnv/internal/config"
+	"github.com/kkkklooooo/AgentEnv/internal/platform"
 )
 
 func TestFourTierCascadingSynthesis(t *testing.T) {

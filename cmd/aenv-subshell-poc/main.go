@@ -7,7 +7,7 @@ import (
 	"runtime"
 	"strings"
 
-	"agentenv/internal/shell"
+	"github.com/kkkklooooo/AgentEnv/internal/shell"
 )
 
 func main() {

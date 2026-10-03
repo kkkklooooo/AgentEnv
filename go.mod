@@ -1,4 +1,4 @@
-module agentenv
+module github.com/kkkklooooo/AgentEnv
 
 go 1.27.1
 
